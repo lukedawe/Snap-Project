@@ -45,42 +45,42 @@ def generate_graph(df):
     roads_and_regions.setdefault("", [])
     region_array = []
     region_to_index = {}
-    index_to_region = {}
     G1 = snap.TUNGraph.New()
-    labels = snap.TIntStrH()
-    # NIdColourH = snap.TIntStrH()
+    label = snap.TIntStrH()
+    NIdColourH = snap.TIntStrH()
+
     for index, row in df.iterrows():
+
         if not search_array(row['local_authority_name'], region_array):
             region_array.append(row['local_authority_name'])
             region_to_index[row['local_authority_name']] = index
             G1.AddNode(index)
-            # NIdColourH[index] = "red"
-            labels[index] = row['local_authority_name']
+            NIdColourH[index] = "red"
+            label[index] = row['local_authority_name']
+
         if not row['road_name'] in roads_and_regions:
             temp = [row['local_authority_name']]
-            # print("temp: ")
-            # print(temp)
             roads_and_regions[row['road_name']] = temp
+
         else:
             found = False
-            for item in roads_and_regions:
-                for i in roads_and_regions[item]:
-                    if row['local_authority_name'] == i:
-                        found = True
+            for i in roads_and_regions[row['road_name']]:
+                if row['local_authority_name'] == i:
+                    found = True
             if not found:
                 roads_and_regions[row['road_name']].append(row['local_authority_name'])
-                # print(roads_and_regions[row['road_name']])
 
     for road in roads_and_regions:
         n = 0
+        temp = []
+        temp = roads_and_regions[road]
         for i in roads_and_regions[road]:
             if n > 0:
-                temp = []
-                temp = roads_and_regions[road]
                 G1.AddEdge(region_to_index[i], region_to_index[temp[n - 1]])
             n += 1
 
-    snap.DrawGViz(G1, snap.gvlCirco, "graph.png", "Scotland's Roads", True, labels)
+    snap.DrawGViz(G1, snap.gvlNeato, "graph.png", "Scotland's Roads", True, NIdColourH)
+    snap.DrawGViz(G1, snap.gvlNeato, "output.png", "Scotland's Roads", label)
 
 
 main()
